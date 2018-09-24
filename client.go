@@ -15,13 +15,14 @@ type Client struct {
 	APIKey string
 	Client *http.Client
 
-	Projects     *ProjectsHandler
-	CA           *CAHandler
-	Services     *ServicesHandler
-	Databases    *DatabasesHandler
-	ServiceUsers *ServiceUsersHandler
-	KafkaTopics  *KafkaTopicsHandler
-	Billing      *BillingHandler
+	Projects     	*ProjectsHandler
+	CA           	*CAHandler
+	Services     	*ServicesHandler
+	Databases    	*DatabasesHandler
+	ServiceUsers 	*ServiceUsersHandler
+	KafkaTopics  	*KafkaTopicsHandler
+	KafkaAcls 		*KafkaAclsHandler
+	Billing      	*BillingHandler
 }
 
 // NewMFAUserClient creates a new client based on email, one-time password and password.
@@ -58,6 +59,7 @@ func (c *Client) Init() {
 	c.Databases = &DatabasesHandler{c}
 	c.ServiceUsers = &ServiceUsersHandler{c}
 	c.KafkaTopics = &KafkaTopicsHandler{c}
+	c.KafkaAcls = &KafkaAclsHandler{c}
 	c.Billing = &BillingHandler{c, &CardsHandler{c}}
 }
 
