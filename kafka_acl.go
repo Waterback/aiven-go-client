@@ -12,16 +12,15 @@ type (
 	}
 
 	CreateKafkaAclRequest struct {
-		Permission		      *string `json:"permission"`
-		Topic				  *string `json:"topic"`
-		Username              *string `json:"username"`
+		Permission *string `json:"permission"`
+		Topic      *string `json:"topic"`
+		Username   *string `json:"username"`
 	}
 
 	KafkaListAcl struct {
-		Id				      *string `json:"id"`
+		Id *string `json:"id"`
 		CreateKafkaAclRequest
 	}
-
 
 	KafkaAclResponse struct {
 		APIResponse
@@ -30,36 +29,39 @@ type (
 )
 
 // Create creats a specific kafka topic.
-func (h *KafkaAclsHandler) Create(project, service string, req CreateKafkaAclRequest) error {
-	bts, err := h.client.doPostRequest(fmt.Sprintf("/project/%s/service/%s/acl", project, service), req)
+func (h *KafkaAclsHandler) Create(project, service string, req CreateKafkaAclRequest) ([]*KafkaListAcl, error) {
+	rsp, err := h.client.doPostRequest(fmt.Sprintf("/project/%s/service/%s/acl", project, service), req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	var rsp *APIResponse
-	if err := json.Unmarshal(bts, &rsp); err != nil {
-		return err
+	var response *KafkaAclResponse
+	if err := json.Unmarshal(rsp, &response); err != nil {
+		return nil, err
 	}
 
-	if rsp == nil {
-		return ErrNoResponseData
+	if len(response.Errors) != 0 {
+		return nil, errors.New(response.Message)
 	}
 
-	if rsp.Errors != nil && len(rsp.Errors) != 0 {
-		return errors.New(rsp.Message)
-	}
-
-	return nil
+	return response.Acls, nil
 }
 
-
-
 // Delete deletes a specific kafka topic.
-func (h *KafkaAclsHandler) Delete(project, service, aclid string) error {
-	bts, err := h.client.doDeleteRequest(fmt.Sprintf("/project/%s/service/%s/acl/%s", project, service, aclid), nil)
+func (h *KafkaAclsHandler) Delete(project, service, aclid string) ([]*KafkaListAcl, error) {
+	rsp, err := h.client.doDeleteRequest(fmt.Sprintf("/project/%s/service/%s/acl/%s", project, service, aclid), nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return handleDeleteResponse(bts)
+	var response *KafkaAclResponse
+	if err := json.Unmarshal(rsp, &response); err != nil {
+		return nil, err
+	}
+
+	if len(response.Errors) != 0 {
+		return nil, errors.New(response.Message)
+	}
+
+	return response.Acls, nil
 }
